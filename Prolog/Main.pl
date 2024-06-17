@@ -42,23 +42,12 @@ board_add(Id, [I, R]) :-
     ( index_of(empty, R, J) -> board_add_empty(Id, I, J) ; true )
 .
 board_update(Id, I, RS) :-
-    writeln(['*** update ***', Id, I, RS]),
     retract(board_row(Id, I, _)),
 	board_add(Id, [I, RS])
 .
 board_add_empty(Id, I, J) :-
     retractall(board_empty(Id, _,_)),
     assert(board_empty(Id, I, J))
-.
-
-board_show(Id) :- 
-   writeln('Board rows:'),
-   findall([IR, Row], board_row(Id, IR, Row), LR),
-   sort(LR, LRS),
-   forall( member([I, R], LRS), writeln([I, R]) ),
-   writeln('Empty at:'),
-   board_empty(Id, EI, EJ),
-   write([EI, EJ])
 .
 
 board_get_valid_move(Id, P, D) :-
@@ -111,17 +100,12 @@ board_check(Id):-
 board_play_dfs(Heap) :-
     \+ is_heap_empty(Heap),
     dequeue_board(Heap, Id, _, _),
-    board_check(Id),
-    format('~nEntontrado ~q!!!!! ~n', [Id]),
-    board_show(Id)
+    board_check(Id)
 .
 
 board_play_dfs(Heap) :-
     \+ is_heap_empty(Heap),
-    dequeue_board(Heap, Id, Move, RestHeap),
-    priority_calculation(Id, Pri),
-    format('~n(1)Priority ~q ~n', [Pri]),
-    format('~n(1)Trying board ~a move=~s~n', [Id, Move]),
+    dequeue_board(Heap, Id, _Move, RestHeap),
     \+ board_is_visited(Id),
    board_set_visited(Id),
    findall([IdChild, DChild], board_child(Id, IdChild, DChild), ChildList),
@@ -131,10 +115,8 @@ board_play_dfs(Heap) :-
 
 board_play_dfs(Heap):-
     \+ is_heap_empty(Heap),
-    dequeue_board(Heap, Id, D, NewHeap),
-    format('~n(2)Trying board ~a move=~s~n', [Id, D]),
+    dequeue_board(Heap, Id, _, NewHeap),
     board_is_visited(Id),
-    format('~n(2)Visited board ~a move=~s~n', [Id, D]),
     board_play_dfs(NewHeap)
 .
 
@@ -160,7 +142,7 @@ test(Id) :-
     is_solvable(L, G),
 	board_from(L, Id),
     board_from(G, IdG),
-	guardar_en_diccionario(resultado, IdG)
-    board_start_play_dsf(I)
+	guardar_en_diccionario(resultado, IdG),
+    board_start_play_dsf(Id)
 .
 
