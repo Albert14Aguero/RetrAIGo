@@ -1,3 +1,4 @@
+:-consult(main).
 :- use_module(library(http/thread_httpd)).
 :- use_module(library(http/http_dispatch)).
 :- use_module(library(http/http_json)).
@@ -8,23 +9,27 @@
 % URL handlers.
 :- http_handler('/', home, []).
 :- http_handler('/query', handle_query, []).
-
-% Folder where files to retrieve are stored.
-safe_folder('./scripts.js/').
-:- http_handler('/query', handle_query, []).
+:- http_handler(root(solve), handle_solve, []).
 
 handle_query(_Request) :-
     % Crear el diccionario con los datos
     Response = _{nombre: "ana", edad: 28},
     % Responder con el diccionario en formato JSON
-    reply_json_dict(Response).
+    reply_json_dict(Response)
+.
+
+handle_solve(_Request) :-
+    test(Id),
+    reply_json(json([id=Id]))
+.
 
 prolog_query(Query, Result) :-
     % Aquí puedes definir cómo quieres manejar las consultas
     % Por ejemplo, puedes evaluar la consulta utilizando el predicado call/1
     (   catch(call(Query), _, fail)
     ->  Result = 'true'
-    ;   Result = 'false').
+    ;   Result = 'false')
+.
 
 % Hechos y reglas de ejemplo
 parent(john, mary).
