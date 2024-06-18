@@ -7,7 +7,9 @@
     swap/6,
     board_from/2,
     board_list/2,
-    board_to/2
+    board_to/2,
+	transformar_lista_de_listas/2,
+	contar_elementos/2
 ])
 .
 
@@ -55,10 +57,36 @@ board_from(L, Id) :-
     enumerate(L, EL),
     forall(member(R, EL), board_add(Id, R))
 .
-board_list(Id, L):-
-    findall(Row, board_row(Id, _, Row), L)
+
+
+board_list(Id, ListasOrdenadas) :-
+    findall(N-List, board_row(Id, N, List), Pares),
+    keysort(Pares, ParesOrdenados),
+    pairs_values(ParesOrdenados, ListasOrdenadas)
 .
 board_to(Id, LS) :-
 	findall([I, Row], board_row(Id, I, Row), L),
 	sort(L, LS)
 .
+
+% Caso base: la lista vacía se transforma en sí misma
+transformar_lista([], []).
+
+transformar_lista([0|Cola], ['empty'|ColaTransformada]) :-
+    transformar_lista(Cola, ColaTransformada).
+
+transformar_lista([Cabeza|Cola], [Cabeza|ColaTransformada]) :-
+    Cabeza \= 0,
+    transformar_lista(Cola, ColaTransformada)
+.
+
+transformar_lista_de_listas([], []).
+transformar_lista_de_listas([Lista|ColaDeListas], [ListaTransformada|ColaDeListasTransformada]) :-
+    transformar_lista(Lista, ListaTransformada),
+    transformar_lista_de_listas(ColaDeListas, ColaDeListasTransformada)
+.
+
+contar_elementos([], 0).
+contar_elementos([_|Cola], N) :-
+    contar_elementos(Cola, NCola),
+    N is NCola + 1.
