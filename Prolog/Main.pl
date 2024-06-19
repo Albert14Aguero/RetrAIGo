@@ -5,7 +5,44 @@
 :-use_module(inversion).
 :-use_module(heap).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+lista_de_movimientos(ListIn, Id, ListOut):-
+     obtener_de_diccionario(Id, IdR, Move, Priority),
+     append(ListIn, [[Move, Priority]], List),
+     lista_de_movimientos(List, IdR, ListOut)
+     
+.
+lista_de_movimientos(ListIn, _, ListIn).
 
+invertir_lista([], []).
+invertir_lista([Cabeza|Cola], ListaInvertida) :-
+    invertir_lista(Cola, ColaInvertida),
+    append(ColaInvertida, [Cabeza], ListaInvertida).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+:-dynamic expantionList/1.
+
+expantion_clear:-
+    retractall(expantionList(_))
+.
+set_expantion(E):-
+    assert(expantionList(E))
+.
+update_expantion(L):-
+    expantionList(L1),
+    append(L1, [L], L2),
+    expantion_clear,
+    set_expantion(L2)
+.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+:-dynamic distance/1.
+distance_clear:-
+    retractall(distance(_))
+.
+set_distance(D):-
+    assert(distance(D))
+.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- dynamic visited/1.
 visited_clear :-
 	retractall(visited(_))
@@ -26,7 +63,7 @@ board_clear_all :-
 .
    
 board_clear(Id) :-
-   retractall(board_row(Id, _)),
+   retractall(board_row(Id, _, _)),
    retractall(board_empty(Id,_)),
    retractall(visited(_))
 .
@@ -36,21 +73,6 @@ board_clone(Id, IdC):-
    board_new_id(IdC),
    forall(member(RC, EL), board_add(IdC, RC))
 .
-
-board_add(Id, [I, R]) :-
-    assert(board_row(Id, I, R)),
-    ( index_of(empty, R, J) -> board_add_empty(Id, I, J) ; true )
-.
-board_update(Id, I, RS) :-
-    writeln(['*** update ***', Id, I, RS]),
-    retract(board_row(Id, I, _)),
-	board_add(Id, [I, RS])
-.
-board_add_empty(Id, I, J) :-
-    retractall(board_empty(Id, _,_)),
-    assert(board_empty(Id, I, J))
-.
-
 board_show(Id) :- 
    writeln('Board rows:'),
    findall([IR, Row], board_row(Id, IR, Row), LR),
@@ -59,6 +81,18 @@ board_show(Id) :-
    writeln('Empty at:'),
    board_empty(Id, EI, EJ),
    write([EI, EJ])
+.
+board_add(Id, [I, R]) :-
+    assert(board_row(Id, I, R)),
+    ( index_of(empty, R, J) -> board_add_empty(Id, I, J) ; true )
+.
+board_update(Id, I, RS) :-
+    retract(board_row(Id, I, _)),
+	board_add(Id, [I, RS])
+.
+board_add_empty(Id, I, J) :-
+    retractall(board_empty(Id, _,_)),
+    assert(board_empty(Id, I, J))
 .
 
 board_get_valid_move(Id, P, D) :-
@@ -92,62 +126,92 @@ board_is_visited(I) :-
 board_set_visited(I) :-
     board_to(I, L),
     term_hash(L, HI),
-	assert(visited(HI)),
-	guardar_en_diccionario(HI, I)
+	assert(visited(HI))
 .
 
-board_start_play_dsf(Id) :-
+board_start_play_dsf(Id, R) :-
     empty_priority_queue(EmptyHeap),
-    enqueue_board(EmptyHeap, Id, 'root', InitialHeap),
-	board_play_dfs(InitialHeap)
+    distance(D),
+    priority_calculation(Id, P, D),
+    enqueue_board(EmptyHeap, Id, 'root', P, InitialHeap),
+	board_play_dfs(InitialHeap, R)
 .
 
 board_check(Id):-
 	board_to(Id, L),
-	obtener_de_diccionario(resultado, IdG),
+	obtener_de_diccionario(resultado, IdG, _M, _P),
 	board_to(IdG, G),
 	L = G
 .
-board_play_dfs(Heap) :-
+board_play_dfs(Heap, R) :-
     \+ is_heap_empty(Heap),
     dequeue_board(Heap, Id, _, _),
     board_check(Id),
-    format('~nEntontrado ~q!!!!! ~n', [Id]),
-    board_show(Id)
+    lista_de_movimientos([], Id, L),
+    invertir_lista(L, R),
+    update_expantion('---------------------------------------'),
+    update_expantion('---------------------------------------'),
+    update_expantion('---------------------------------------')
 .
 
-board_play_dfs(Heap) :-
+board_play_dfs(Heap, R) :-
     \+ is_heap_empty(Heap),
     dequeue_board(Heap, Id, Move, RestHeap),
-    priority_calculation(Id, Pri),
-    format('~n(1)Priority ~q ~n', [Pri]),
-    format('~n(1)Trying board ~a move=~s~n', [Id, Move]),
+    distance(D),
+    priority_calculation(Id, Pri, D),
+    update_expantion('---------------------------------------'),
+    multiple_atom_concat('(1)Trying board:', [Id, Move, 'Priority:', Pri], RA),
+    update_expantion(RA),
     \+ board_is_visited(Id),
    board_set_visited(Id),
    findall([IdChild, DChild], board_child(Id, IdChild, DChild), ChildList),
-   enqueue_children(ChildList, RestHeap, NewHeap),
-   board_play_dfs(NewHeap)
+   enqueue_children(ChildList, RestHeap, NewHeap, Id),
+   board_play_dfs(NewHeap, R)
 .
 
-board_play_dfs(Heap):-
+board_play_dfs(Heap, R):-
     \+ is_heap_empty(Heap),
     dequeue_board(Heap, Id, D, NewHeap),
-    format('~n(2)Trying board ~a move=~s~n', [Id, D]),
+    multiple_atom_concat('(2)Trying board:', [Id, 'move =', D], RA1),
+    update_expantion(RA1),
     board_is_visited(Id),
-    format('~n(2)Visited board ~a move=~s~n', [Id, D]),
-    board_play_dfs(NewHeap)
+    multiple_atom_concat('(2)Visited board:', [Id, ' move =',D], RA2),
+    update_expantion(RA2),
+    board_play_dfs(NewHeap, R)
 .
 
 
-enqueue_children([], Heap, Heap).
-enqueue_children([[IdC, DC] | Rest], Heap, NewHeap):-
-    enqueue_board(Heap, IdC, DC, TempHeap),
-    enqueue_children(Rest, TempHeap, NewHeap)
+enqueue_children([], Heap, Heap, _).
+enqueue_children([[IdC, DC] | Rest], Heap, NewHeap, IdF):-
+    distance(D),
+    priority_calculation(IdC, P, D),
+    guardar_en_diccionario(IdC, IdF, DC, P),
+    multiple_atom_concat('Enqueue:', [IdC, '\nMove:', DC, '\nPriority:', P], ResultAtom),
+    update_expantion(ResultAtom),
+    enqueue_board(Heap, IdC, DC, P, TempHeap),
+    enqueue_children(Rest, TempHeap, NewHeap, IdF)
 .
-test(Id) :-
+solve(L, G, _Distance, 'No se pudo resolver el problema', -1):-
+    \+is_solvable(L, G)
+.
+solve(L, G, Distance, Ex, R) :-
     board_clear_all,
 	eliminar_diccionario,
+    expantion_clear,
+    set_expantion([]),
+    distance_clear,
+    set_distance(Distance),
 	inicializar_diccionario,
+	board_clear(_),
+    is_solvable(L, G),
+	board_from(L, Id),
+    board_from(G, IdG),
+	guardar_en_diccionario(resultado, IdG, final, 0),
+    board_start_play_dsf(Id, R),
+    expantionList(Ex)
+.
+
+test(R):-
 	L = [
         [1,3,empty],
         [8,2,4],
@@ -156,11 +220,6 @@ test(Id) :-
         [1,2,3],
         [8,empty,4],
         [7,6,5]],
-	board_clear(_),
-    is_solvable(L, G),
-	board_from(L, Id),
-    board_from(G, IdG),
-	guardar_en_diccionario(resultado, IdG)
-    board_start_play_dsf(I)
-.
+    solve(L, G, R)
 
+.

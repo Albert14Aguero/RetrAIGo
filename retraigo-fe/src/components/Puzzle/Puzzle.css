@@ -1,0 +1,52 @@
+.puzzle-table {
+    border-collapse: collapse;
+    margin: 20px;
+  }
+  
+  .puzzle-table td {
+    border: 1px solid black;
+    padding: 20px;
+    text-align: center;
+    width: 60px;
+    height: 60px;
+  }
+
+/* Puzzle.css */
+.puzzle-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .reset-button {
+    margin-bottom: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .reset-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .puzzle-table {
+    border-collapse: collapse;
+  }
+  
+  .puzzle-table td {
+    border: 1px solid black;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+  }
+  
+  .puzzle-table input {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+  }
+  
