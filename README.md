@@ -15,12 +15,15 @@ The 8-puzzle is a sliding puzzle game that consists of a 3x3 grid with 8 pieces 
 ## Getting Started
 To install dependencies:
 ```bash
+cd retraigo-fe
+
 npm install
 # or
 yarn install
 # or
 pnpm install
 ```
+Run the Start.bat file or follow these steps
 Start the backend server
 ```bash
 cd prolog
