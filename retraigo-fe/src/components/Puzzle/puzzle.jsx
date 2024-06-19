@@ -1,5 +1,5 @@
 // Puzzle.js
-import './Puzzle.css'; 
+import './puzzle.css'; 
 
 const Puzzle = ({ grid, setGrid }) => {
 

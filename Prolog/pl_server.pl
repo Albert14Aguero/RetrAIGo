@@ -22,13 +22,13 @@ handle_solve(Request) :-
     Distance = DictIn.distance,
     transformar_lista_de_listas(Initial, L),
     transformar_lista_de_listas(Goal, G),
-    solve(L, G, Distance, Result),
+    solve(L, G, Distance, Ex, Result),
     ( Result = -1
         ->
-        (DictOut = _{error: 'No se pudo resolver el problema'},
+        (DictOut = _{error: Ex},
         reply_json_dict(DictOut));
         (contar_elementos(Result, N),
-        DictOut = _{moves: Result, quantity:N},
+        DictOut = _{moves: Result, quantity:N, expantion:Ex},
         reply_json_dict(DictOut))
     )
 .

@@ -6,11 +6,12 @@
 
   }
   .puzzle-container {
+    
     display: inline-block;
     padding: 20px;
     background-color: #f0f0f0;
     border: 1px solid #ccc;
-    margin: 0 10px; /* Espaciado adicional si es necesario */
+    margin: 10px; /* Espaciado adicional si es necesario */
     text-align: center;
     font-size: 16px;
     border-radius: 5px;
@@ -47,3 +48,21 @@
   color: #666;
   cursor: not-allowed;
 }
+
+.option-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Estilos para el botón desactivado */
+.option-button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+

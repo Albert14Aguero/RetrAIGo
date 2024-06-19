@@ -1,0 +1,32 @@
+.tabs {
+    display: flex;
+    margin-bottom: 1em;
+  }
+  
+  .tabs button {
+    padding: 0.5em 1em;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: #f0f0f0;
+    margin-right: 0.5em;
+  }
+  
+  .tabs button.active {
+    background: #ccc;
+  }
+  
+  .tab-content {
+    border: 1px solid #ccc;
+    padding: 1em;
+  }
+  
+  .lista-sin-puntos {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .lista-sin-puntos li {
+    margin-bottom: 5px; /* Ajusta el espacio entre elementos según tus necesidades */
+  }
+  

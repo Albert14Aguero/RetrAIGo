@@ -19,6 +19,21 @@ invertir_lista([Cabeza|Cola], ListaInvertida) :-
     invertir_lista(Cola, ColaInvertida),
     append(ColaInvertida, [Cabeza], ListaInvertida).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+:-dynamic expantionList/1.
+
+expantion_clear:-
+    retractall(expantionList(_))
+.
+set_expantion(E):-
+    assert(expantionList(E))
+.
+update_expantion(L):-
+    expantionList(L1),
+    append(L1, [L], L2),
+    expantion_clear,
+    set_expantion(L2)
+.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :-dynamic distance/1.
 distance_clear:-
     retractall(distance(_))
@@ -133,12 +148,20 @@ board_play_dfs(Heap, R) :-
     dequeue_board(Heap, Id, _, _),
     board_check(Id),
     lista_de_movimientos([], Id, L),
-    invertir_lista(L, R)
+    invertir_lista(L, R),
+    update_expantion('---------------------------------------'),
+    update_expantion('---------------------------------------'),
+    update_expantion('---------------------------------------')
 .
 
 board_play_dfs(Heap, R) :-
     \+ is_heap_empty(Heap),
-    dequeue_board(Heap, Id, _Move, RestHeap),
+    dequeue_board(Heap, Id, Move, RestHeap),
+    distance(D),
+    priority_calculation(Id, Pri, D),
+    update_expantion('---------------------------------------'),
+    multiple_atom_concat('(1)Trying board:', [Id, Move, 'Priority:', Pri], RA),
+    update_expantion(RA),
     \+ board_is_visited(Id),
    board_set_visited(Id),
    findall([IdChild, DChild], board_child(Id, IdChild, DChild), ChildList),
@@ -148,8 +171,12 @@ board_play_dfs(Heap, R) :-
 
 board_play_dfs(Heap, R):-
     \+ is_heap_empty(Heap),
-    dequeue_board(Heap, Id, _, NewHeap),
+    dequeue_board(Heap, Id, D, NewHeap),
+    multiple_atom_concat('(2)Trying board:', [Id, 'move =', D], RA1),
+    update_expantion(RA1),
     board_is_visited(Id),
+    multiple_atom_concat('(2)Visited board:', [Id, ' move =',D], RA2),
+    update_expantion(RA2),
     board_play_dfs(NewHeap, R)
 .
 
@@ -159,15 +186,19 @@ enqueue_children([[IdC, DC] | Rest], Heap, NewHeap, IdF):-
     distance(D),
     priority_calculation(IdC, P, D),
     guardar_en_diccionario(IdC, IdF, DC, P),
+    multiple_atom_concat('Enqueue:', [IdC, '\nMove:', DC, '\nPriority:', P], ResultAtom),
+    update_expantion(ResultAtom),
     enqueue_board(Heap, IdC, DC, P, TempHeap),
     enqueue_children(Rest, TempHeap, NewHeap, IdF)
 .
-solve(L, G, _Distance, -1):-
+solve(L, G, _Distance, 'No se pudo resolver el problema', -1):-
     \+is_solvable(L, G)
 .
-solve(L, G, Distance, R) :-
+solve(L, G, Distance, Ex, R) :-
     board_clear_all,
 	eliminar_diccionario,
+    expantion_clear,
+    set_expantion([]),
     distance_clear,
     set_distance(Distance),
 	inicializar_diccionario,
@@ -176,7 +207,8 @@ solve(L, G, Distance, R) :-
 	board_from(L, Id),
     board_from(G, IdG),
 	guardar_en_diccionario(resultado, IdG, final, 0),
-    board_start_play_dsf(Id, R)
+    board_start_play_dsf(Id, R),
+    expantionList(Ex)
 .
 
 test(R):-

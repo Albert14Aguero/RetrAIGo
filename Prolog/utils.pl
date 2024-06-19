@@ -1,5 +1,6 @@
 
 :- module(utils, [
+    multiple_atom_concat/3,
     zip/3,
 	enumerate/2,
 	index_of/3,
@@ -12,6 +13,26 @@
 	contar_elementos/2
 ])
 .
+multiple_atom_concat(Frase, [], Frase).
+multiple_atom_concat(Frase, [Element |Rest], Result):-
+    atom_concat(Frase, ' ', Temp1),
+    \+is_list(Element),
+    atom_concat(Temp1, Element, Temp2),
+    multiple_atom_concat(Temp2, Rest, Result)
+.
+multiple_atom_concat(Frase, [L |Rest], Result):-
+    atom_concat(Frase, ' ', Temp1),
+    is_list(L),
+    lista_a_atomo(L, Element),
+    atom_concat(Temp1, Element, Temp2),
+    multiple_atom_concat(Temp2, Rest, Result)
+.
+lista_a_atomo([], '').
+lista_a_atomo([X], XString) :-
+    atom_string(XString, X).
+lista_a_atomo([H|T], Atomo) :-
+    lista_a_atomo(T, TString),
+    atomic_list_concat(['[', H, ',', TString, ']'], Atomo).
 
 zip(L, M, Z) :- maplist( [X, Y, [X, Y]] >> true, L, M, Z)
 .
@@ -69,7 +90,6 @@ board_to(Id, LS) :-
 	sort(L, LS)
 .
 
-% Caso base: la lista vacía se transforma en sí misma
 transformar_lista([], []).
 
 transformar_lista([0|Cola], ['empty'|ColaTransformada]) :-

@@ -1,16 +1,19 @@
 
-import './Main.css'; 
+import './main.css'; 
 import React, { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Puzzle from '../Puzzle/puzzle';
+import Resultados from '../Resultados/resultados';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Main = () => {
   const [gridInit, setGridInit] = useState(Array(9).fill(null));
   const [gridGoal, setGridGoal] = useState(Array(9).fill(null));
   const [loading, setLoading] = useState(false);
-  const [manhattan, setManhattan] = useState(false);
-  const [resultado, setResultado] = useState("");
+  const [manhattan, setManhattan] = useState(true);
+  const [movimientos, setMovimientos] = useState([]);
+  const [totalMovimientos, setTotalMovimientos] = useState(0);
+  const [expantionList, setExpantionList] = useState([]);
 
   const prepararLista = (lista) => {
     lista = lista.map(elemento => elemento === null ? 0 : elemento);
@@ -53,8 +56,10 @@ const Main = () => {
         if(result.error){
           toast.error(result.error);
         }else{
-          
-          setResultado(JSON.stringify(result))
+          console.log(JSON.stringify(result.moves))
+          setMovimientos(result.moves)
+          setTotalMovimientos(result.quantity)
+          setExpantionList(result.expantion)
         }
       } else {
         console.error('Error:', response.statusText);
@@ -78,11 +83,6 @@ const Main = () => {
         </div>
         <button onClick={handleClick} className="reset-button" disabled={loading}>{loading ? 'Cargando...' : 'Resolver'}</button>
       </div>
-        
-        <div >
-          <h1>Resultado:</h1>
-          <p>{resultado}</p>
-        </div>
         <div className="container">
         <div className="puzzle-container">
           Estado Inicial
@@ -91,6 +91,10 @@ const Main = () => {
         <div className="puzzle-container">
           Estado Final
           <Puzzle grid={gridGoal} setGrid={setGridGoal} />
+        </div>
+        <div className="puzzle-container">
+          Resultados
+          <Resultados movimientos={movimientos} expansion={expantionList} total={totalMovimientos}/>
         </div>
       </div>
       <ToastContainer />
