@@ -211,8 +211,9 @@ solve(L, G, Distance, Ex, R) :-
     is_solvable(L, G),
 	board_from(L, Id),
     board_from(G, IdG),
-    guardar_en_diccionario(Id, inicio, root, 0, 1),
 	guardar_en_diccionario(resultado, IdG, final, 0, _),
+    priority_calculation(Id, P, Distance),
+    guardar_en_diccionario(Id, inicio, root, P, 1),
     board_start_play_dsf(Id, R),
     expantionList(Ex)
 .
