@@ -4,13 +4,13 @@
 .
 priority_calculation(Id, P, 1):-
     board_list(Id, L1),
-    obtener_de_diccionario('resultado', IdR, _, _), 
+    obtener_de_diccionario('resultado', IdR, _, _, _), 
     board_list(IdR, L2),
     manhattan_distance(L1, L2, P)
 .
 priority_calculation(Id, P, 0):-
     board_list(Id, L1),
-    obtener_de_diccionario('resultado', IdR, _, _), 
+    obtener_de_diccionario('resultado', IdR, _, _, _), 
     board_list(IdR, L2),
     difference_distance(L1, L2, P)
 .
